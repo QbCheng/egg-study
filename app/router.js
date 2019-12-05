@@ -44,4 +44,12 @@ module.exports = app => {
   RBACRouter.post('/userAssignRole', controller.rbac.userAssignRole);
   // 给用户卸载角
   RBACRouter.post('/userUnassignRole', controller.rbac.userUnassignRole);
+  // 用户拥有的权限
+  RBACRouter.post('/userHasPermission', controller.rbac.userHasPermission);
+  // 用户拥有的角色
+  RBACRouter.post('/userHasRole', controller.rbac.userHasRole);
+  // 用户拥有的所有权限
+  RBACRouter.post('/userHasAllPermission', controller.rbac.userHasAllPermission);
+  // 角色拥有的权限
+  RBACRouter.post('/roleHasPermission', controller.rbac.roleHasPermission);
 };

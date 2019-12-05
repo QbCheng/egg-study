@@ -4,10 +4,31 @@ const Service = require('egg').Service;
 
 class RbacService extends Service {
 
-  async permissionList() {
+  // 获得权限列表
+  async permissionList(parameter) {
     const { ctx } = this;
-    return ctx.helper.formatInternalMsg(0, 'succ', {});
+    // 获取必要参数
+    const { mark, interval } = parameter;
+    const permissionList = await ctx.model.Permission.Permission.findAll(
+      {
+        attributes: [ 'name', 'id' ],
+        offset: mark * interval,
+        limit: interval,
+      }
+    );
+
+    const totalNum = await ctx.model.Permission.Permission.count({});
+
+    const ret = {
+      list: permissionList,
+      length: permissionList.length,
+      totalNum,
+    };
+
+    console.log(permissionList);
+    return ctx.helper.formatInternalMsg(0, 'succ', ret);
   }
+
 
   async createPermission(parameter) {
     const { ctx } = this;
@@ -58,9 +79,29 @@ class RbacService extends Service {
   }
 
   // 获得角色列表
-  async roleList() {
+  async roleList(parameter) {
     const { ctx } = this;
-    return ctx.helper.formatInternalMsg(0, 'succ', {});
+    // 获取必要参数
+    const { mark, interval } = parameter;
+    const list = await ctx.model.Permission.Role.findAll(
+      {
+        attributes: [ 'name', 'id' ],
+        offset: mark * interval,
+        limit: interval,
+        raw: true,
+      }
+    );
+
+    const totalNum = await ctx.model.Permission.Permission.count({});
+
+    const ret = {
+      list,
+      length: list.length,
+      totalNum,
+    };
+
+    console.log(list);
+    return ctx.helper.formatInternalMsg(0, 'succ', ret);
   }
 
   // 删除角色
@@ -206,6 +247,135 @@ class RbacService extends Service {
       return ctx.helper.formatInternalMsg(-1, 'Role remove failed', {});
     }
     return ctx.helper.formatInternalMsg(0, 'succ', {});
+  }
+
+  // 用户拥有的单权限
+  async userHasPermission() {
+    const { ctx } = this;
+    const userId = ctx.state.user.id;
+    // -TODO: 使用关联查询时，定义关联时，使用来as，则此处必须显式写出as的别名
+    const permissionList = await ctx.model.User.findByPk(userId, {
+      include: [{
+        model: ctx.model.Permission.Permission,
+        as: 'Permissions',
+      }],
+    });
+
+    if (!permissionList) {
+      return ctx.helper.formatInternalMsg(-1, 'Nonexistent user', {});
+    }
+    const ret = {
+      permissionList,
+    };
+    return ctx.helper.formatInternalMsg(0, 'succ', ret);
+  }
+
+  // 用户拥有的角色
+  async userHasRole() {
+    const { ctx } = this;
+    const userId = ctx.state.user.id;
+    // -TODO: 使用关联查询时，定义关联时，使用来as，则此处必须显式写出as的别名
+    const roleList = await ctx.model.User.findByPk(userId, {
+      include: [{
+        model: ctx.model.Permission.Role,
+        as: 'Roles',
+      }],
+    });
+    if (!roleList) {
+      return ctx.helper.formatInternalMsg(-1, 'Nonexistent user', {});
+    }
+    const ret = {
+      roleList,
+    };
+    return ctx.helper.formatInternalMsg(0, 'succ', ret);
+  }
+
+  // 获得用户所有的权限
+  async userHasAllPermission() {
+    const { ctx } = this;
+    const userId = ctx.state.user.id;
+    // -TODO: 使用关联查询时，定义关联时，使用来as，则此处必须显式写出as的别名
+    const retData = await ctx.model.User.findByPk(userId, {
+      include: [
+        {
+          model: ctx.model.Permission.Role,
+          attributes: [ 'id' ], // 设置返回的属性
+          as: 'Roles',
+          include: [{
+            attributes: [ 'id', 'name' ], // 设置返回的属性
+            model: ctx.model.Permission.Permission,
+            as: 'Permissions',
+          },
+          ],
+        },
+        {
+          attributes: [ 'id', 'name' ], // 设置返回的属性
+          model: ctx.model.Permission.Permission,
+          as: 'Permissions',
+        },
+      ],
+    });
+    if (!retData) {
+      return ctx.helper.formatInternalMsg(-1, 'Nonexistent user', {});
+    }
+    // 权限汇总
+    const data = retData.dataValues;
+    // 权限汇总结果保持
+    const permissionList = {};
+    // 将用户拥有的角色的权限汇总
+    if (data.Roles && data.Roles.length > 0) {
+      data.Roles.forEach(value => {
+        if (value.Permissions && value.Permissions.length > 0) {
+          value.Permissions.forEach(value => {
+            if (permissionList[value.id]) {
+              return;
+            }
+            permissionList[value.id] = {
+              id: value.id,
+              name: value.name,
+            };
+          });
+        }
+      });
+    }
+    // 将用户拥有的单权限汇总
+    if (data.Permissions && data.Permissions.length > 0) {
+      data.Permissions.forEach(value => {
+        if (permissionList[value.id]) {
+          return;
+        }
+        permissionList[value.id] = {
+          id: value.id,
+          name: value.name,
+        };
+      });
+    }
+    const ret = {
+      permissionList,
+    };
+    return ctx.helper.formatInternalMsg(0, 'succ', ret);
+  }
+
+  async roleHasPermission(parameter) {
+    const { ctx } = this;
+    // 获取必要参数
+    const { roleId } = parameter;
+
+    // findByPk : 通过主键去查询
+    const permissionList = await ctx.model.Permission.Role.findByPk(roleId, {
+      include: [{
+        model: ctx.model.Permission.Permission,
+        as: 'Permissions',
+      }],
+    });
+    console.log(permissionList.dataValues);
+    if (!permissionList) {
+      return ctx.helper.formatInternalMsg(-1, 'Nonexistent Role', {});
+    }
+    const ret = {
+      permissionList,
+    };
+    return ctx.helper.formatInternalMsg(0, 'succ', ret);
   }
 }
 

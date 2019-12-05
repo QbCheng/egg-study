@@ -3,29 +3,44 @@
 const Controller = require('egg').Controller;
 
 class RbacController extends Controller {
+  // 获得权限列表
   async permissionList() {
-    const { ctx } = this;
-    console.log(ctx.state.user);
-    /*
-    * 打印内容为：{ username : 'admin', iat: 1560346903 }
-    * iat 为过期时间，可以单独写中间件验证，这里不做细究
-    * 除了 iat 之后，其余的为当时存储的数据
-    **/
-    ctx.body = { code: 0, msg: '验证成功' };
+    const { ctx, service } = this;
+    const parameterRet = await ctx.helper.getRequestParameter();
+    if (parameterRet.code !== 0) {
+      return ctx.helper.formatMsg(parameterRet);
+    }
+    // 取非文件数据参数
+    const parameter = parameterRet.data.commonData;
+    // 判断是否需要做参数效验
+    if (parameterRet.data.validate) {
+      const rule = {
+        mark: { type: 'integer', required: true, min: 0 },
+        interval: { type: 'integer', required: true, min: 0 },
+      };
+      ctx.validate(rule, parameter);
+    }
+    const result = await service.rbac.permissionList(parameter);
+    return ctx.helper.formatMsg(result);
   }
-
   // 创建权限
   async createPermission() {
     const { ctx, service } = this;
-    // 效验规则
-    const rule = {
-      name: 'string', // 简写 {type: 'string', required: true, allowEmpty: false} 相当
-    };
-    ctx.validate(rule);
-    // 组装参数
-    const data = ctx.request.body;
+    const parameterRet = await ctx.helper.getRequestParameter();
+    if (parameterRet.code !== 0) {
+      return ctx.helper.formatMsg(parameterRet);
+    }
 
-    const result = await service.rbac.createPermission(data);
+    // 取非文件数据参数
+    const parameter = parameterRet.data.commonData;
+    // 判断是否需要做参数效验
+    if (parameterRet.data.validate) {
+      const rule = {
+        name: 'string',
+      };
+      ctx.validate(rule, parameter);
+    }
+    const result = await service.rbac.createPermission(parameter);
     return ctx.helper.formatMsg(result);
   }
 
@@ -34,20 +49,18 @@ class RbacController extends Controller {
     const { ctx, service } = this;
     const parameterRet = await ctx.helper.getRequestParameter();
     if (parameterRet.code !== 0) {
-      return parameterRet;
+      return ctx.helper.formatMsg(parameterRet);
     }
 
     // 取非文件数据参数
     const parameter = parameterRet.data.commonData;
-    let rule = {
-    };
     // 判断是否需要做参数效验
     if (parameterRet.data.validate) {
-      rule = {
+      const rule = {
         id: 'array',
       };
+      ctx.validate(rule, parameter);
     }
-    ctx.validate(rule, parameter);
     const result = await service.rbac.delPermission(parameter);
     return ctx.helper.formatMsg(result);
   }
@@ -57,39 +70,52 @@ class RbacController extends Controller {
     const { ctx, service } = this;
     const parameterRet = await ctx.helper.getRequestParameter();
     if (parameterRet.code !== 0) {
-      return parameterRet;
+      return ctx.helper.formatMsg(parameterRet);
     }
     // 取非文件数据参数
     const parameter = parameterRet.data.commonData;
     if (parameterRet.data.validate) {
-
       const rule = {
         name: 'string',
-        id: 'int',
+        id: { type: 'integer', required: true, min: 0 },
       };
       ctx.validate(rule, parameter);
     }
-    console.log('当前的参数 : ' + JSON.stringify(parameter));
     const result = await service.rbac.updatePermission(parameter);
     return ctx.helper.formatMsg(result);
   }
 
   async roleList() {
-    const { ctx } = this;
-    return ctx.helper.formatInternalMsg(0, 'succ', {});
+    const { ctx, service } = this;
+    const parameterRet = await ctx.helper.getRequestParameter();
+    if (parameterRet.code !== 0) {
+      return ctx.helper.formatMsg(parameterRet);
+    }
+    // 取非文件数据参数
+    const parameter = parameterRet.data.commonData;
+    console.log(parameter);
+    // 判断是否需要做参数效验
+    if (parameterRet.data.validate) {
+      const rule = {
+        mark: { type: 'integer', required: true, min: 0 },
+        interval: { type: 'integer', required: true, min: 0 },
+      };
+      ctx.validate(rule, parameter);
+    }
+    const result = await service.rbac.roleList(parameter);
+    return ctx.helper.formatMsg(result);
   }
 
   async delRole() {
     const { ctx, service } = this;
     const parameterRet = await ctx.helper.getRequestParameter();
     if (parameterRet.code !== 0) {
-      return parameterRet;
+      return ctx.helper.formatMsg(parameterRet);
     }
 
     // 取非文件数据参数
     const parameter = parameterRet.data.commonData;
     if (parameterRet.data.validate) {
-
       const rule = {
         id: 'array',
       };
@@ -104,16 +130,17 @@ class RbacController extends Controller {
     const { ctx, service } = this;
     const parameterRet = await ctx.helper.getRequestParameter();
     if (parameterRet.code !== 0) {
-      return parameterRet;
+      return ctx.helper.formatMsg(parameterRet);
     }
     // 取非文件数据参数
     const parameter = parameterRet.data.commonData;
-    const rule = {
-      name: 'string',
-    };
 
-    console.log('当前的参数 : ' + JSON.stringify(parameter));
-    ctx.validate(rule, parameter);
+    if (parameterRet.data.validate) {
+      const rule = {
+        name: 'string',
+      };
+      ctx.validate(rule, parameter);
+    }
 
     const result = await service.rbac.createRole(parameter);
     return ctx.helper.formatMsg(result);
@@ -123,19 +150,17 @@ class RbacController extends Controller {
     const { ctx, service } = this;
     const parameterRet = await ctx.helper.getRequestParameter();
     if (parameterRet.code !== 0) {
-      return parameterRet;
+      return ctx.helper.formatMsg(parameterRet);
     }
     // 取非文件数据参数
     const parameter = parameterRet.data.commonData;
     if (parameterRet.data.validate) {
-
       const rule = {
         name: 'string',
-        id: 'int',
+        id: { type: 'integer', required: true, min: 0 },
       };
       ctx.validate(rule, parameter);
     }
-    console.log('当前的参数 : ' + JSON.stringify(parameter));
     const result = await service.rbac.updateRole(parameter);
     return ctx.helper.formatMsg(result);
   }
@@ -145,19 +170,17 @@ class RbacController extends Controller {
     const { ctx, service } = this;
     const parameterRet = await ctx.helper.getRequestParameter();
     if (parameterRet.code !== 0) {
-      return parameterRet;
+      return ctx.helper.formatMsg(parameterRet);
     }
     // 取非文件数据参数
     const parameter = parameterRet.data.commonData;
     if (parameterRet.data.validate) {
-
       const rule = {
-        roleId: 'int',
+        roleId: { type: 'integer', required: true, min: 0 },
         permissionIdList: 'array',
       };
       ctx.validate(rule, parameter);
     }
-    console.log('当前的参数 : ' + JSON.stringify(parameter));
     const result = await service.rbac.roleAssignPermission(parameter);
     return ctx.helper.formatMsg(result);
   }
@@ -167,19 +190,17 @@ class RbacController extends Controller {
     const { ctx, service } = this;
     const parameterRet = await ctx.helper.getRequestParameter();
     if (parameterRet.code !== 0) {
-      return parameterRet;
+      return ctx.helper.formatMsg(parameterRet);
     }
     // 取非文件数据参数
     const parameter = parameterRet.data.commonData;
     if (parameterRet.data.validate) {
-
       const rule = {
-        roleId: 'int',
+        roleId: { type: 'integer', required: true, min: 0 },
         permissionIdList: 'array',
       };
       ctx.validate(rule, parameter);
     }
-    console.log('当前的参数 : ' + JSON.stringify(parameter));
     const result = await service.rbac.roleUnassignPermission(parameter);
     return ctx.helper.formatMsg(result);
   }
@@ -188,19 +209,17 @@ class RbacController extends Controller {
     const { ctx, service } = this;
     const parameterRet = await ctx.helper.getRequestParameter();
     if (parameterRet.code !== 0) {
-      return parameterRet;
+      return ctx.helper.formatMsg(parameterRet);
     }
     // 取非文件数据参数
     const parameter = parameterRet.data.commonData;
     if (parameterRet.data.validate) {
-
       const rule = {
-        userId: 'int',
+        userId: { type: 'integer', required: true, min: 0 },
         permissionIdList: 'array',
       };
       ctx.validate(rule, parameter);
     }
-    console.log('当前的参数 : ' + JSON.stringify(parameter));
     const result = await service.rbac.userAssignPermission(parameter);
     return ctx.helper.formatMsg(result);
   }
@@ -210,19 +229,17 @@ class RbacController extends Controller {
     const { ctx, service } = this;
     const parameterRet = await ctx.helper.getRequestParameter();
     if (parameterRet.code !== 0) {
-      return parameterRet;
+      return ctx.helper.formatMsg(parameterRet);
     }
     // 取非文件数据参数
     const parameter = parameterRet.data.commonData;
     if (parameterRet.data.validate) {
-
       const rule = {
-        userId: 'int',
+        userId: { type: 'integer', required: true, min: 0 },
         roleIdList: 'array',
       };
       ctx.validate(rule, parameter);
     }
-    console.log('当前的参数 : ' + JSON.stringify(parameter));
     const result = await service.rbac.userAssignRole(parameter);
     return ctx.helper.formatMsg(result);
   }
@@ -232,22 +249,92 @@ class RbacController extends Controller {
     const { ctx, service } = this;
     const parameterRet = await ctx.helper.getRequestParameter();
     if (parameterRet.code !== 0) {
-      return parameterRet;
+      return ctx.helper.formatMsg(parameterRet);
     }
     // 取非文件数据参数
     const parameter = parameterRet.data.commonData;
     if (parameterRet.data.validate) {
-
       const rule = {
-        userId: 'int',
+        userId: { type: 'integer', required: true, min: 0 },
         roleIdList: 'array',
       };
       ctx.validate(rule, parameter);
     }
-    console.log('当前的参数 : ' + JSON.stringify(parameter));
     const result = await service.rbac.userUnassignRole(parameter);
     return ctx.helper.formatMsg(result);
   }
+
+  // 用户拥有的单权限
+  async userHasPermission() {
+    const { ctx, service } = this;
+    const parameterRet = await ctx.helper.getRequestParameter();
+    if (parameterRet.code !== 0) {
+      return ctx.helper.formatMsg(parameterRet);
+    }
+    // 取非文件数据参数
+    const parameter = parameterRet.data.commonData;
+    if (parameterRet.data.validate) {
+      const rule = {};
+      ctx.validate(rule, parameter);
+    }
+    const result = await service.rbac.userHasPermission();
+    return ctx.helper.formatMsg(result);
+  }
+
+  // 用户拥有的角色
+  async userHasRole() {
+    const { ctx, service } = this;
+    const parameterRet = await ctx.helper.getRequestParameter();
+    if (parameterRet.code !== 0) {
+      return ctx.helper.formatMsg(parameterRet);
+    }
+    // 取非文件数据参数
+    const parameter = parameterRet.data.commonData;
+    if (parameterRet.data.validate) {
+      const rule = {};
+      ctx.validate(rule, parameter);
+    }
+    const result = await service.rbac.userHasRole();
+    return ctx.helper.formatMsg(result);
+  }
+
+  // 用户拥有的权限
+  async userHasAllPermission() {
+    const { ctx, service } = this;
+    const parameterRet = await ctx.helper.getRequestParameter();
+    if (parameterRet.code !== 0) {
+      return ctx.helper.formatMsg(parameterRet);
+    }
+    // 取非文件数据参数
+    const parameter = parameterRet.data.commonData;
+    if (parameterRet.data.validate) {
+      const rule = {};
+      ctx.validate(rule, parameter);
+    }
+    const result = await service.rbac.userHasAllPermission();
+    return ctx.helper.formatMsg(result);
+  }
+
+  // 角色拥有的权限
+  async roleHasPermission() {
+    const { ctx, service } = this;
+    const parameterRet = await ctx.helper.getRequestParameter();
+    if (parameterRet.code !== 0) {
+      return ctx.helper.formatMsg(parameterRet);
+    }
+    // 取非文件数据参数
+    const parameter = parameterRet.data.commonData;
+    if (parameterRet.data.validate) {
+      const rule = {
+        roleId: { type: 'integer', required: true, min: 0 },
+      };
+      ctx.validate(rule, parameter);
+    }
+    const result = await service.rbac.roleHasPermission(parameter);
+    return ctx.helper.formatMsg(result);
+  }
+
+
 }
 
 module.exports = RbacController;

@@ -18,6 +18,7 @@ module.exports = {
   // 获取http消息参数
   async getRequestParameter() {
     const requestContentType = this.ctx.request.is();
+    // 当类型获取失败直接返回
     const retData = {
       commonData: null,
       stream: null,
@@ -36,7 +37,7 @@ module.exports = {
       retData.validate = true;
     } else {
       const errorMessage = 'content-type Only support application/x-www-form-urlencoded or multipart/form-data or application/json';
-      return this.formatInternalMsg(-1, errorMessage, retData);
+      return this.formatInternalMsg(-1, errorMessage, []);
     }
     return this.formatInternalMsg(0, 'succ', retData);
   },
