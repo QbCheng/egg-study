@@ -4,6 +4,16 @@ const Service = require('egg').Service;
 
 class RbacService extends Service {
 
+  // 获得与RBAC系统相关的配置
+  getRbacUserConfig() {
+
+    const obj = {
+      rbacCacheTime: 86400,
+    };
+
+    return obj;
+  }
+
   // 获得权限列表
   async permissionList(parameter) {
     const { ctx } = this;
@@ -24,8 +34,6 @@ class RbacService extends Service {
       length: permissionList.length,
       totalNum,
     };
-
-    console.log(permissionList);
     return ctx.helper.formatInternalMsg(0, 'succ', ret);
   }
 
@@ -99,8 +107,6 @@ class RbacService extends Service {
       length: list.length,
       totalNum,
     };
-
-    console.log(list);
     return ctx.helper.formatInternalMsg(0, 'succ', ret);
   }
 
@@ -169,7 +175,6 @@ class RbacService extends Service {
     }
     // -TODO: 插入成功返回对象的数组
     const addRet = await roleModel.addPermissions(permissionIdList);
-    console.log(addRet);
     if (!addRet) {
       return ctx.helper.formatInternalMsg(-1, 'permission exist', {});
     }
@@ -187,7 +192,6 @@ class RbacService extends Service {
       return ctx.helper.formatInternalMsg(-1, 'Nonexistent role', {});
     }
     const removeRet = await roleModel.removePermissions(permissionIdList);
-    console.log(removeRet);
     if (removeRet === 0) {
       return ctx.helper.formatInternalMsg(-1, 'Permissions remove failed', {});
     }
@@ -206,7 +210,6 @@ class RbacService extends Service {
       return ctx.helper.formatInternalMsg(-1, 'Nonexistent user', {});
     }
     const addRet = await UserModel.addPermissions(permissionIdList);
-    console.log(addRet);
     if (!addRet) {
       return ctx.helper.formatInternalMsg(-1, 'Permissions add failed', {});
     }
@@ -350,12 +353,19 @@ class RbacService extends Service {
         };
       });
     }
+    const cacheRet = await this.setUserPermissionCache(permissionList);
+    if (cacheRet) {
+      console.log('cacheRet succ');
+    } else {
+      console.log('cacheRet failed');
+    }
     const ret = {
       permissionList,
     };
     return ctx.helper.formatInternalMsg(0, 'succ', ret);
   }
 
+  // 角色拥有的权限
   async roleHasPermission(parameter) {
     const { ctx } = this;
     // 获取必要参数
@@ -368,7 +378,6 @@ class RbacService extends Service {
         as: 'Permissions',
       }],
     });
-    console.log(permissionList.dataValues);
     if (!permissionList) {
       return ctx.helper.formatInternalMsg(-1, 'Nonexistent Role', {});
     }
@@ -377,6 +386,28 @@ class RbacService extends Service {
     };
     return ctx.helper.formatInternalMsg(0, 'succ', ret);
   }
-}
 
+  // 将用户权限缓存
+  async setUserPermissionCache(cacheData) {
+    const data = {};
+    // 处理一下数据
+    for (const key in cacheData) {
+      data[key] = JSON.stringify(cacheData[key]);
+    }
+    const { ctx } = this;
+    const userId = ctx.state.user.id;
+    const redisConfig = ctx.service.redis.getRedisUserConfig();
+    // 获取redis客户端实例
+    const redisInstance = await ctx.service.redis.getRedisInstanceInMultiClent(redisConfig.redisClientIndex.cache);
+    const key = ctx.service.redis.getRabcCacheRedisKey(userId);
+    console.log(userId);
+    console.log(key);
+    const rbacConfig = this.getRbacUserConfig();
+    // 设置数据
+    const hmsetRet = await redisInstance.hmset(key, data);
+    // 设置数据过期时间
+    const expierRet = await redisInstance.expire(key, rbacConfig.rbacCacheTime);
+    return true;
+  }
+}
 module.exports = RbacService;

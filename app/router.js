@@ -6,10 +6,10 @@
 module.exports = app => {
   const { router, controller, jwt } = app;
   router.get('/', controller.home.index);
-  router.get('/test', controller.user.testModel);
+  router.get('/test', jwt, controller.home.testJwt);
 
-  // 不进行jwt效验
-  router.post('/home/login', controller.home.login);
+  // 用户登录(返回登录令牌)
+  router.post('/user/login', controller.user.login);
 
   /*
   * 这里的第二个对象不再是控制器，而是 jwt 验证对象，第三个地方才是控制器
@@ -52,4 +52,10 @@ module.exports = app => {
   RBACRouter.post('/userHasAllPermission', controller.rbac.userHasAllPermission);
   // 角色拥有的权限
   RBACRouter.post('/roleHasPermission', controller.rbac.roleHasPermission);
+
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // 与用户有关的路由
+  const UserRouter = router.namespace('/user', jwt);
+  UserRouter.post('/getUserInfo', controller.user.getUserInfo);
+
 };

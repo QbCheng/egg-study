@@ -18,6 +18,13 @@ module.exports = app => {
       type: Sequelize.STRING(30),
       field: 'password',
     },
+
+    introduction: {
+      type: Sequelize.STRING(250),
+      field: 'introduction',
+    },
+    avatar: { type: Sequelize.STRING(200), field: 'avatar' },
+    name: { type: Sequelize.STRING(30), field: 'name' },
   }, {
     timestamps: true,
     tablename: 'users',
@@ -48,6 +55,18 @@ module.exports = app => {
       foreignKey: 'modelId',
       // 进行关联查询时，关联表查出来的数据模型的alias
       as: 'Permissions',
+      onUpdate: 'CASCADE', // default: 'SET NULL|CASCADE'
+      onDelete: 'CASCADE', // default: 'CASCADE'
+      // 外键上应该启用on update和on delete约束。
+      constraints: true,
+    });
+
+    // 设置用户的客户端路由
+    User.hasMany(app.model.ModelHasClientRouter, {
+      // 指定中间表的外键关联
+      foreignKey: 'userId',
+      // 进行关联查询时，关联表查出来的数据模型的alias
+      as: 'ClientRouter',
       onUpdate: 'CASCADE', // default: 'SET NULL|CASCADE'
       onDelete: 'CASCADE', // default: 'CASCADE'
       // 外键上应该启用on update和on delete约束。

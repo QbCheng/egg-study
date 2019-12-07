@@ -92,6 +92,36 @@ module.exports = appInfo => {
     ],
   };
 
+  // 多客户端配置，也可以使用集群配置
+  config.redis = {
+    clients: {
+      user: { // instanceName. See below
+        port: 6379, // Redis port
+        host: '127.0.0.1', // Redis host
+        password: '',
+        db: 0,
+      },
+      cache: {
+        port: 6379,
+        host: '127.0.0.1',
+        password: '',
+        db: 1,
+      },
+      extra: {
+        port: 6379,
+        host: '127.0.0.1',
+        password: '',
+        db: 2,
+      },
+    },
+  };
+
+  config.cors = {
+    origin: '*',
+    allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH',
+  };
+
+
   return {
     ...config,
     ...userConfig,

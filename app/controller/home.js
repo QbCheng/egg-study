@@ -4,7 +4,7 @@ const Controller = require('egg').Controller;
 
 class HomeController extends Controller {
   async index() {
-    const { ctx } = this;
+    const { ctx, app } = this;
     ctx.body = 'hi, egg';
   }
 
@@ -33,7 +33,7 @@ class HomeController extends Controller {
 
   async testJwt() {
     const { ctx } = this;
-
+    await ctx.service.user.getUserClientRouter();
     /*
     * 打印内容为：{ username : 'admin', iat: 1560346903 }
     * iat 为过期时间，可以单独写中间件验证，这里不做细究

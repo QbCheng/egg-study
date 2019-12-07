@@ -29,4 +29,16 @@ module.exports = {
     package: 'egg-validate',
   },
 
+  // redis组件
+  redis: {
+    enable: true,
+    package: 'egg-redis',
+  },
+
+  // 开启运行跨域组件
+  cors: {
+    enable: true,
+    package: 'egg-cors',
+  },
+
 };
