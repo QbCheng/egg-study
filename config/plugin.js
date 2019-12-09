@@ -12,11 +12,6 @@ module.exports = {
     package: 'egg-sequelize',
   },
 
-  jwt: {
-    enable: true,
-    package: 'egg-jwt',
-  },
-
   // 使用 egg-router-plus组件，增加统一的路由前缀和中间件，但是不支持路由重定向
   routerPlus: {
     enable: true,
@@ -39,6 +34,12 @@ module.exports = {
   cors: {
     enable: true,
     package: 'egg-cors',
+  },
+
+  //  jwt组件
+  jwt: {
+    enable: true,
+    package: 'egg-jwt',
   },
 
 };

@@ -25,7 +25,7 @@ module.exports = appInfo => {
     all(err, ctx) {
       // 在此处定义针对所有响应类型的错误处理方法
       // 注意，定义了 config.all 之后，其他错误处理方法不会再生效
-      ctx.body = JSON.stringify({ code: 0, error: err.message, info: [] });
+      ctx.body = { code: 0, error: err.message, info: [] };
       ctx.status = 200;
     },
   };
@@ -62,11 +62,6 @@ module.exports = appInfo => {
         collate: 'utf8mb4_general_ci',
       },
     },
-  };
-
-  // jwt模块的密钥
-  config.jwt = {
-    secret: '123456',
   };
 
   // 设置安全组件
@@ -121,6 +116,23 @@ module.exports = appInfo => {
     allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH',
   };
 
+  // {app_root}/config/plugin.js
+  // 服务器鉴权组件
+  config.passport = {
+    enable: true,
+    package: 'egg-passport',
+  };
+
+  // 服务器鉴权组件 -本地登录组件
+  config.passportLocal = {
+    enable: true,
+    package: 'egg-passport-local',
+  };
+
+  // jwt组件配置
+  config.jwt = {
+    secret: '123456',
+  };
 
   return {
     ...config,
