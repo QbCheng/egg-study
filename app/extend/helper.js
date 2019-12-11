@@ -42,4 +42,12 @@ module.exports = {
     return this.formatInternalMsg(0, 'succ', retData);
   },
 
+  // 判断字符是否为空的方法
+  isEmpty(obj) {
+    if (typeof obj === 'undefined' || obj == null || obj === '') {
+      return true;
+    }
+    return false;
+  },
+
 };

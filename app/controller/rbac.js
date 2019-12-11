@@ -15,8 +15,8 @@ class RbacController extends Controller {
     // 判断是否需要做参数效验
     if (parameterRet.data.validate) {
       const rule = {
-        mark: { type: 'integer', required: true, min: 0 },
-        interval: { type: 'integer', required: true, min: 0 },
+        page: { type: 'integer', required: true, min: 1 },
+        limit: { type: 'integer', required: true, min: 0 },
       };
       ctx.validate(rule, parameter);
     }
@@ -97,8 +97,8 @@ class RbacController extends Controller {
     // 判断是否需要做参数效验
     if (parameterRet.data.validate) {
       const rule = {
-        mark: { type: 'integer', required: true, min: 0 },
-        interval: { type: 'integer', required: true, min: 0 },
+        page: { type: 'integer', required: true, min: 1 },
+        limit: { type: 'integer', required: true, min: 0 },
       };
       ctx.validate(rule, parameter);
     }

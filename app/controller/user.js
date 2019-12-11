@@ -32,6 +32,29 @@ class UserController extends Controller {
     const result = await service.user.getUserInfo();
     return ctx.helper.formatMsg(result);
   }
+
+  // 获得用户数据
+  async list() {
+    const { ctx, service } = this;
+    const parameterRet = await ctx.helper.getRequestParameter();
+    if (parameterRet.code !== 0) {
+      return ctx.helper.formatMsg(parameterRet);
+    }
+    // 取非文件数据参数
+    const parameter = parameterRet.data.commonData;
+    console.log(parameter);
+    // 判断是否需要做参数效验
+    if (parameterRet.data.validate) {
+      const rule = {
+        page: { type: 'integer', required: false, min: 1, default: 1 },
+        limit: { type: 'integer', required: false, min: 0, default: 15 },
+        account: { type: 'string', required: false, default: '' },
+      };
+      ctx.validate(rule, parameter);
+    }
+    const result = await service.user.list(parameter);
+    return ctx.helper.formatMsg(result);
+  }
 }
 
 module.exports = UserController;

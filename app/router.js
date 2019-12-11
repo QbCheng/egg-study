@@ -56,6 +56,10 @@ module.exports = app => {
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // 与用户有关的路由
   const UserRouter = router.namespace('/user', jwt);
+  // 单用户操作
   UserRouter.post('/getUserInfo', controller.user.getUserInfo);
+
+  // 用户管理
+  UserRouter.post('/list', controller.user.list);
 
 };

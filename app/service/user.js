@@ -51,6 +51,37 @@ class UserService extends Service {
     return ctx.helper.formatInternalMsg(0, 'succ', { userInfo });
   }
 
+  // 获得用户的信息
+  async list(parameter) {
+    const { ctx } = this;
+    // 获取必要参数
+    const { page, limit, account } = parameter;
+    const accountFilter = ctx.helper.isEmpty(account) ? null : account;
+    const list = await ctx.model.User.findAll(
+      {
+        where: {
+          account: accountFilter,
+        },
+        offset: (page - 1) * limit,
+        account: ctx.helper.isEmpty(account) ? null : account,
+        limit,
+      }
+    );
+
+    const totalNum = await ctx.model.User.count({
+      where: {
+        account: accountFilter,
+      },
+    });
+
+    const ret = {
+      list,
+      length: list.length,
+      totalNum,
+    };
+    return ctx.helper.formatInternalMsg(0, 'succ', ret);
+  }
+
 }
 
 module.exports = UserService;

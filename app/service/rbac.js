@@ -18,12 +18,12 @@ class RbacService extends Service {
   async permissionList(parameter) {
     const { ctx } = this;
     // 获取必要参数
-    const { mark, interval } = parameter;
+    const { page, limit } = parameter;
     const permissionList = await ctx.model.Permission.Permission.findAll(
       {
         attributes: [ 'name', 'id' ],
-        offset: mark * interval,
-        limit: interval,
+        offset: (page - 1) * limit,
+        limit,
       }
     );
 
@@ -90,13 +90,12 @@ class RbacService extends Service {
   async roleList(parameter) {
     const { ctx } = this;
     // 获取必要参数
-    const { mark, interval } = parameter;
+    const { page, limit } = parameter;
     const list = await ctx.model.Permission.Role.findAll(
       {
         attributes: [ 'name', 'id' ],
-        offset: mark * interval,
-        limit: interval,
-        raw: true,
+        offset: (page - 1) * limit,
+        limit,
       }
     );
 
