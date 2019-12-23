@@ -59,7 +59,13 @@ module.exports = app => {
   // 单用户操作
   UserRouter.post('/getUserInfo', controller.user.getUserInfo);
 
-  // 用户管理
+  // 用户列表
   UserRouter.post('/list', controller.user.list);
+  // 更新用户
+  UserRouter.post('/update', controller.user.update);
+  // 删除用户
+  UserRouter.post('/delete', controller.user.delete);
+  // 创建用户
+  UserRouter.post('/create', controller.user.create);
 
 };

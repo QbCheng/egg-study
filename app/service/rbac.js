@@ -18,16 +18,28 @@ class RbacService extends Service {
   async permissionList(parameter) {
     const { ctx } = this;
     // 获取必要参数
-    const { page, limit } = parameter;
+    const { page, limit, id, name } = parameter;
+    const opt1 = {
+      where: {},
+      offset: (page - 1) * limit,
+      limit,
+      order: [[ 'created_at', 'DESC' ]],
+    };
+    const opt2 = { where: {} };
+    if (!ctx.helper.isEmpty(id)) {
+      opt1.where.id = id;
+      opt2.where.id = id;
+    }
+
+    if (!ctx.helper.isEmpty(name)) {
+      opt1.where.name = name;
+      opt2.where.name = name;
+    }
     const permissionList = await ctx.model.Permission.Permission.findAll(
-      {
-        attributes: [ 'name', 'id' ],
-        offset: (page - 1) * limit,
-        limit,
-      }
+      opt1
     );
 
-    const totalNum = await ctx.model.Permission.Permission.count({});
+    const totalNum = await ctx.model.Permission.Permission.count(opt2);
 
     const ret = {
       list: permissionList,
@@ -53,14 +65,22 @@ class RbacService extends Service {
 
   // 删除某个权限
   async delPermission(parameter) {
-    const { ctx } = this;
+    const { ctx, app } = this;
+    const { Op } = app.Sequelize;
     // 获取必要参数
     const { id } = parameter;
-    const delRet = await ctx.model.Permission.Permission.destroy({
+    const data = [];
+    if (id && id.length > 0) {
+      id.forEach(element => {
+        data.push({ id: element });
+      });
+    }
+    const opt = {
       where: {
-        id,
+        [Op.or]: data,
       },
-    });
+    };
+    const delRet = await ctx.model.Permission.Permission.destroy(opt);
     if (delRet === 0) {
       return ctx.helper.formatInternalMsg(-1, 'Nonexistent permission', {});
     }
@@ -90,16 +110,28 @@ class RbacService extends Service {
   async roleList(parameter) {
     const { ctx } = this;
     // 获取必要参数
-    const { page, limit } = parameter;
+    const { page, limit, id, name } = parameter;
+    const opt1 = {
+      where: {},
+      offset: (page - 1) * limit,
+      limit,
+      order: [[ 'created_at', 'DESC' ]],
+    };
+    const opt2 = { where: {} };
+    if (!ctx.helper.isEmpty(id)) {
+      opt1.where.id = id;
+      opt2.where.id = id;
+    }
+
+    if (!ctx.helper.isEmpty(name)) {
+      opt1.where.name = name;
+      opt2.where.name = name;
+    }
     const list = await ctx.model.Permission.Role.findAll(
-      {
-        attributes: [ 'name', 'id' ],
-        offset: (page - 1) * limit,
-        limit,
-      }
+      opt1
     );
 
-    const totalNum = await ctx.model.Permission.Permission.count({});
+    const totalNum = await ctx.model.Permission.Role.count(opt2);
 
     const ret = {
       list,
@@ -111,14 +143,22 @@ class RbacService extends Service {
 
   // 删除角色
   async delRole(parameter) {
-    const { ctx } = this;
+    const { ctx, app } = this;
+    const { Op } = app.Sequelize;
     // 获取必要参数
     const { id } = parameter;
-    const delRet = await ctx.model.Permission.Role.destroy({
+    const data = [];
+    if (id && id.length > 0) {
+      id.forEach(element => {
+        data.push({ id: element });
+      });
+    }
+    const opt = {
       where: {
-        id,
+        [Op.or]: data,
       },
-    });
+    };
+    const delRet = await ctx.model.Permission.Role.destroy(opt);
     if (delRet === 0) {
       return ctx.helper.formatInternalMsg(-1, 'Nonexistent role', {});
     }

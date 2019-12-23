@@ -55,24 +55,30 @@ class UserService extends Service {
   async list(parameter) {
     const { ctx } = this;
     // 获取必要参数
-    const { page, limit, account } = parameter;
-    const accountFilter = ctx.helper.isEmpty(account) ? null : account;
+    const { page, limit, account, name } = parameter;
+    const opt1 = {
+      where: {},
+      offset: (page - 1) * limit,
+      limit,
+      order: [[ 'created_at', 'DESC' ]],
+    };
+    const opt2 = { where: {} };
+    if (!ctx.helper.isEmpty(account)) {
+      opt1.where.account = account;
+      opt2.where.account = account;
+    }
+
+    if (!ctx.helper.isEmpty(name)) {
+      opt1.where.name = name;
+      opt2.where.name = name;
+    }
     const list = await ctx.model.User.findAll(
-      {
-        where: {
-          account: accountFilter,
-        },
-        offset: (page - 1) * limit,
-        account: ctx.helper.isEmpty(account) ? null : account,
-        limit,
-      }
+      opt1
     );
 
-    const totalNum = await ctx.model.User.count({
-      where: {
-        account: accountFilter,
-      },
-    });
+    const totalNum = await ctx.model.User.count(
+      opt2
+    );
 
     const ret = {
       list,
@@ -82,6 +88,64 @@ class UserService extends Service {
     return ctx.helper.formatInternalMsg(0, 'succ', ret);
   }
 
+  // 删除
+  async delete(parameter) {
+    const { ctx, app } = this;
+    const { Op } = app.Sequelize;
+    // 获取必要参数
+    const { account } = parameter;
+    const data = [];
+    console.log(account);
+    if (account && account.length > 0) {
+      account.forEach(element => {
+        data.push({ account: element });
+      });
+    }
+    const opt = {
+      where: {
+        [Op.or]: data,
+      },
+    };
+    const delRet = await ctx.model.User.destroy(opt);
+    if (delRet === 0) {
+      return ctx.helper.formatInternalMsg(-1, 'Nonexistent User', {});
+    }
+    return ctx.helper.formatInternalMsg(0, 'succ', {});
+  }
+
+  // 创建
+  async create(parameter) {
+    const { ctx } = this;
+    console.log(parameter);
+    const createRet = await ctx.model.User.create(parameter,
+      {});
+    if (createRet === 0) {
+      return ctx.helper.formatInternalMsg(-1, 'create User failed', {});
+    }
+    return ctx.helper.formatInternalMsg(0, 'succ', {});
+  }
+
+  // 更新角色数据
+  async update(parameter) {
+    const { ctx } = this;
+    // 获取必要参数
+    console.log(parameter);
+    const { account, password, introduction, avatar, name } = parameter;
+    const saveRet = await ctx.model.User.update(
+      { account, password, introduction, avatar, name },
+      {
+        where: {
+          account,
+        },
+      }
+    );
+    if (saveRet === 0) {
+      return ctx.helper.formatInternalMsg(-1, 'Nonexistent User', {});
+    }
+    return ctx.helper.formatInternalMsg(0, 'succ', {});
+  }
+
 }
 
 module.exports = UserService;
+

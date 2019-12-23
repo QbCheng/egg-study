@@ -48,11 +48,49 @@ class UserController extends Controller {
       const rule = {
         page: { type: 'integer', required: false, min: 1, default: 1 },
         limit: { type: 'integer', required: false, min: 0, default: 15 },
-        account: { type: 'string', required: false, default: '' },
       };
       ctx.validate(rule, parameter);
     }
     const result = await service.user.list(parameter);
+    return ctx.helper.formatMsg(result);
+  }
+
+  // 创建用户数据
+  async create() {
+    const { ctx, service } = this;
+    const parameterRet = await ctx.helper.getRequestParameter();
+    if (parameterRet.code !== 0) {
+      return ctx.helper.formatMsg(parameterRet);
+    }
+    // 取非文件数据参数
+    const parameter = parameterRet.data.commonData;
+    const result = await service.user.create(parameter);
+    return ctx.helper.formatMsg(result);
+  }
+
+  // 获得用户数据
+  async update() {
+    const { ctx, service } = this;
+    const parameterRet = await ctx.helper.getRequestParameter();
+    if (parameterRet.code !== 0) {
+      return ctx.helper.formatMsg(parameterRet);
+    }
+    // 取非文件数据参数
+    const parameter = parameterRet.data.commonData;
+    const result = await service.user.update(parameter);
+    return ctx.helper.formatMsg(result);
+  }
+
+  // 删除
+  async delete() {
+    const { ctx, service } = this;
+    const parameterRet = await ctx.helper.getRequestParameter();
+    if (parameterRet.code !== 0) {
+      return ctx.helper.formatMsg(parameterRet);
+    }
+    // 取非文件数据参数
+    const parameter = parameterRet.data.commonData;
+    const result = await service.user.delete(parameter);
     return ctx.helper.formatMsg(result);
   }
 }

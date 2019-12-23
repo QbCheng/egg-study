@@ -28,6 +28,7 @@
     "egg-ts-helper": "^1.25.6",
     "eslint": "^5.13.0",
     "eslint-config-egg": "^7.1.0",
+    "moment": "^2.24.0",
     "sequelize-cli": "^5.5.1"
   },
   "engines": {

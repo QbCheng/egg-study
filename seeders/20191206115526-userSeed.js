@@ -1,4 +1,5 @@
 'use strict';
+const moment = require('moment');
 
 module.exports = {
   up: async queryInterface => {
@@ -9,6 +10,8 @@ module.exports = {
         introduction: '',
         avatar: '',
         name: '陈膑',
+        created_at: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
+        updated_at: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
       },
       {
         account: 'test2',
@@ -16,6 +19,8 @@ module.exports = {
         introduction: '',
         avatar: '',
         name: 'test2',
+        created_at: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
+        updated_at: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
       }],
       {});
   },
