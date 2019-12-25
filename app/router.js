@@ -34,15 +34,15 @@ module.exports = app => {
   RBACRouter.post('/createRole', controller.rbac.createRole);
   // 更新角色
   RBACRouter.post('/updateRole', controller.rbac.updateRole);
-  // 给角色挂载权
+  // 给角色挂载权限
   RBACRouter.post('/roleAssignPermission', controller.rbac.roleAssignPermission);
-  // 给角色卸载权
+  // 给角色卸载权限
   RBACRouter.post('/roleUnassignPermission', controller.rbac.roleUnassignPermission);
-  // 给用户挂载权
+  // 给用户挂载权限
   RBACRouter.post('/userAssignPermission', controller.rbac.userAssignPermission);
-  // 给用户挂载角
+  // 给用户挂载角色
   RBACRouter.post('/userAssignRole', controller.rbac.userAssignRole);
-  // 给用户卸载角
+  // 给用户卸载角色
   RBACRouter.post('/userUnassignRole', controller.rbac.userUnassignRole);
   // 用户拥有的权限
   RBACRouter.post('/userHasPermission', controller.rbac.userHasPermission);

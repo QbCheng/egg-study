@@ -215,9 +215,9 @@ class RbacService extends Service {
     // -TODO: 插入成功返回对象的数组
     const addRet = await roleModel.addPermissions(permissionIdList);
     if (!addRet) {
-      return ctx.helper.formatInternalMsg(-1, 'permission exist', {});
+      return ctx.helper.formatInternalMsg(-1, 'Nonexistent succ assign permission', {});
     }
-    return ctx.helper.formatInternalMsg(0, 'succ', {});
+    return ctx.helper.formatInternalMsg(0, 'succ', { list: addRet });
   }
 
   async roleUnassignPermission(parameter) {
@@ -232,9 +232,9 @@ class RbacService extends Service {
     }
     const removeRet = await roleModel.removePermissions(permissionIdList);
     if (removeRet === 0) {
-      return ctx.helper.formatInternalMsg(-1, 'Permissions remove failed', {});
+      return ctx.helper.formatInternalMsg(-1, 'Nonexistent succ unassign permission', {});
     }
-    return ctx.helper.formatInternalMsg(0, 'succ', {});
+    return ctx.helper.formatInternalMsg(0, 'succ', { list: removeRet });
   }
 
   // 给用户分配权限
@@ -421,7 +421,7 @@ class RbacService extends Service {
       return ctx.helper.formatInternalMsg(-1, 'Nonexistent Role', {});
     }
     const ret = {
-      permissionList,
+      list: permissionList.Permissions,
     };
     return ctx.helper.formatInternalMsg(0, 'succ', ret);
   }
